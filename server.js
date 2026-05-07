@@ -29,7 +29,7 @@ app.post("/api/analyze-audio", async (req, res) => {
   try {
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: {
         parts: [
           { inlineData: { mimeType, data: audioData } },

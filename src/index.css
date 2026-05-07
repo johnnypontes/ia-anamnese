@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --osteomedic-primary: #1389A8;
+  --osteomedic-secondary: #67CADB;
+  --osteomedic-accent: #0e6f8a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #09090b; color: #f4f4f5; font-family: system-ui, sans-serif; }
+
+.text-osteomedic-primary { color: var(--osteomedic-primary); }
+.text-osteomedic-secondary { color: var(--osteomedic-secondary); }
+.bg-osteomedic-primary { background-color: var(--osteomedic-primary); }
+.bg-osteomedic-accent { background-color: var(--osteomedic-accent); }
+.hover\:bg-osteomedic-accent:hover { background-color: var(--osteomedic-accent); }
+.border-osteomedic-secondary { border-color: var(--osteomedic-secondary); }
+.border-osteomedic-primary { border-color: var(--osteomedic-primary); }
+.shadow-osteomedic-primary\/20 { box-shadow: 0 4px 20px rgba(19,137,168,0.2); }
+.focus\:border-osteomedic-secondary:focus { border-color: var(--osteomedic-secondary); }

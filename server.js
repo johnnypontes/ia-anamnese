@@ -33,7 +33,7 @@ app.post("/api/analyze-audio", async (req, res) => {
       contents: {
         parts: [
           { inlineData: { mimeType, data: audioData } },
-          { text: prompt + "\n\nRetorne obrigatoriamente um JSON válido com a estrutura completa da anamnese." }
+          { text: prompt + "\n\nRetorne obrigatoriamente um JSON válido com dois blocos:\n1. Todos os campos clínicos estruturados da anamnese.\n2. Um campo 'transcricao' com o texto bruto da conversa organizado por fala, exatamente assim:\n\"Médico: [fala]\\nPaciente: [fala]\\nMédico: [fala]...\"\nNão omita nenhuma informação mencionada no áudio. Se algo não couber nos campos estruturados, coloque na transcrição." }
         ]
       },
       config: { responseMimeType: "application/json" }

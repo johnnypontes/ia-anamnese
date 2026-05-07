@@ -36,6 +36,7 @@ export interface AnamnesisResult {
   impressaoDiagnostica: { principal: string; diferenciais: string; };
   condutaMedica: { examesSolicitados: string; prescricao: string; orientacoes: string; };
   evolucaoClinica: string;
+  transcricao: string;
 }
 
 const Header = ({ credits, onOpenSettings }: { credits: number | null; onOpenSettings: () => void }) => (
@@ -88,6 +89,7 @@ export default function App() {
   const [patientPhone, setPatientPhone] = useState('');
   const [credits, setCredits] = useState<number | null>(null);
   const [activeLayoutIdx, setActiveLayoutIdx] = useState(0);
+  const [activeTab, setActiveTab] = useState<'estruturada' | 'transcricao'>('estruturada');
   const [layouts, setLayouts] = useState([
     { name: 'Padrão Osteomedic', prompt: 'Você é um assistente médico especialista da Osteomedic. Transcreva e estruture a anamnese distinguindo vozes de Médico e Paciente. Siga o padrão clínico completo.' },
     { name: 'Pediatria Express', prompt: 'Foco em pediatria. Identifique marcos de desenvolvimento, histórico vacinal e queixas dos pais. Use linguagem técnica médica para o prontuário.' },
@@ -228,7 +230,8 @@ export default function App() {
         exameFisico: { sinaisVitais: { pa: data.exameFisico?.sinaisVitais?.pa || '', fc: data.exameFisico?.sinaisVitais?.fc || '', satO2: data.exameFisico?.sinaisVitais?.satO2 || '' }, avaliacaoSegmentar: data.exameFisico?.avaliacaoSegmentar || '' },
         impressaoDiagnostica: { principal: data.impressaoDiagnostica?.principal || '', diferenciais: data.impressaoDiagnostica?.diferenciais || '' },
         condutaMedica: { examesSolicitados: data.condutaMedica?.examesSolicitados || '', prescricao: data.condutaMedica?.prescricao || '', orientacoes: data.condutaMedica?.orientacoes || '' },
-        evolucaoClinica: data.evolucaoClinica || ''
+        evolucaoClinica: data.evolucaoClinica || '',
+        transcricao: data.transcricao || ''
       };
 
       setAnamnesis(sanitized);
@@ -435,9 +438,17 @@ PACIENTE: ${patientName || anamnesis.paciente?.nome} | CONTATO: ${patientPhone}
             <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-900/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-zinc-800"><FileText className="w-5 h-5 text-zinc-400" /></div>
-                <div>
-                  <h2 className="text-sm font-bold text-white uppercase tracking-tight">Ficha de Anamnese Estruturada</h2>
-                  <p className="text-[10px] text-zinc-500 uppercase font-mono tracking-widest">Medical Record Generation</p>
+                <div className="flex gap-1">
+                  <button onClick={() => setActiveTab('estruturada')}
+                    className={cn("px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors",
+                      activeTab === 'estruturada' ? "bg-osteomedic-primary text-white" : "bg-zinc-800 text-zinc-400 hover:text-white")}>
+                    Estruturada
+                  </button>
+                  <button onClick={() => setActiveTab('transcricao')}
+                    className={cn("px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors",
+                      activeTab === 'transcricao' ? "bg-osteomedic-primary text-white" : "bg-zinc-800 text-zinc-400 hover:text-white")}>
+                    Transcrição
+                  </button>
                 </div>
               </div>
               <button disabled={!anamnesis} onClick={downloadPDF} className="p-2 bg-zinc-800 rounded-lg hover:bg-zinc-700 transition-colors text-zinc-400 disabled:opacity-30">
@@ -502,24 +513,44 @@ PACIENTE: ${patientName || anamnesis.paciente?.nome} | CONTATO: ${patientPhone}
                       ))}
                     </div>
 
-                    <div className="space-y-6">
-                      {[
-                        { title: 'Queixa Principal', content: `${anamnesis.queixaPrincipal.relato}\nInício: ${anamnesis.queixaPrincipal.inicio} | EVA: ${anamnesis.queixaPrincipal.intensidade}` },
-                        { title: 'História da Doença Atual', content: `${anamnesis.hda.inicioMecanismo}\n${anamnesis.hda.localizacaoIrradiacao}\n${anamnesis.hda.fatoresMelhoraPiora}\nTratamentos: ${anamnesis.hda.tratamentosPrevios}` },
-                        { title: 'Antecedentes', content: `Pessoais: ${anamnesis.antecedentes.pessoais}\nFamiliares: ${anamnesis.antecedentes.familiares}\nMedicamentos: ${anamnesis.antecedentes.medicamentosEmUso.join(', ') || 'Nenhum'}` },
-                        { title: 'Exame Físico', content: `PA ${anamnesis.exameFisico.sinaisVitais.pa} | FC ${anamnesis.exameFisico.sinaisVitais.fc} | SatO2 ${anamnesis.exameFisico.sinaisVitais.satO2}\n${anamnesis.exameFisico.avaliacaoSegmentar}` },
-                        { title: 'Impressão Diagnóstica', content: `${anamnesis.impressaoDiagnostica.principal}\nDiferenciais: ${anamnesis.impressaoDiagnostica.diferenciais}` },
-                        { title: 'Conduta Médica', content: `Exames: ${anamnesis.condutaMedica.examesSolicitados}\nPrescrição: ${anamnesis.condutaMedica.prescricao}\nOrientações: ${anamnesis.condutaMedica.orientacoes}` },
-                        { title: 'Evolução Clínica', content: anamnesis.evolucaoClinica },
-                      ].map(({ title, content }) => (
-                        <div key={title} className="space-y-2">
-                          <h3 className="text-xs font-bold text-osteomedic-secondary uppercase tracking-widest border-b border-zinc-800 pb-2">{title}</h3>
-                          <div className="text-xs text-zinc-300 leading-relaxed font-sans whitespace-pre-line pl-2">
-                            <ReactMarkdown>{content}</ReactMarkdown>
+                    {activeTab === 'estruturada' ? (
+                      <div className="space-y-6">
+                        {[
+                          { title: 'Queixa Principal', content: `${anamnesis.queixaPrincipal.relato}\nInício: ${anamnesis.queixaPrincipal.inicio} | EVA: ${anamnesis.queixaPrincipal.intensidade}` },
+                          { title: 'História da Doença Atual', content: `${anamnesis.hda.inicioMecanismo}\n${anamnesis.hda.localizacaoIrradiacao}\n${anamnesis.hda.fatoresMelhoraPiora}\nTratamentos: ${anamnesis.hda.tratamentosPrevios}` },
+                          { title: 'Antecedentes', content: `Pessoais: ${anamnesis.antecedentes.pessoais}\nFamiliares: ${anamnesis.antecedentes.familiares}\nMedicamentos: ${anamnesis.antecedentes.medicamentosEmUso.join(', ') || 'Nenhum'}` },
+                          { title: 'Exame Físico', content: `PA ${anamnesis.exameFisico.sinaisVitais.pa} | FC ${anamnesis.exameFisico.sinaisVitais.fc} | SatO2 ${anamnesis.exameFisico.sinaisVitais.satO2}\n${anamnesis.exameFisico.avaliacaoSegmentar}` },
+                          { title: 'Impressão Diagnóstica', content: `${anamnesis.impressaoDiagnostica.principal}\nDiferenciais: ${anamnesis.impressaoDiagnostica.diferenciais}` },
+                          { title: 'Conduta Médica', content: `Exames: ${anamnesis.condutaMedica.examesSolicitados}\nPrescrição: ${anamnesis.condutaMedica.prescricao}\nOrientações: ${anamnesis.condutaMedica.orientacoes}` },
+                          { title: 'Evolução Clínica', content: anamnesis.evolucaoClinica },
+                        ].map(({ title, content }) => (
+                          <div key={title} className="space-y-2">
+                            <h3 className="text-xs font-bold text-osteomedic-secondary uppercase tracking-widest border-b border-zinc-800 pb-2">{title}</h3>
+                            <div className="text-xs text-zinc-300 leading-relaxed font-sans whitespace-pre-line pl-2">
+                              <ReactMarkdown>{content}</ReactMarkdown>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <h3 className="text-xs font-bold text-osteomedic-secondary uppercase tracking-widest border-b border-zinc-800 pb-2">Transcrição da Consulta</h3>
+                        {anamnesis.transcricao ? (
+                          <div className="space-y-3 pl-2">
+                            {anamnesis.transcricao.split('\n').filter(Boolean).map((line, i) => {
+                              const isMedico = line.startsWith('Médico:') || line.startsWith('Medico:');
+                              return (
+                                <div key={i} className={cn("text-xs leading-relaxed font-sans", isMedico ? "text-osteomedic-secondary" : "text-zinc-300")}>
+                                  {line}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-zinc-500 pl-2 italic">Transcrição não disponível para esta gravação.</p>
+                        )}
+                      </div>
+                    )}
                   </motion.div>
                 ) : (
                   <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}

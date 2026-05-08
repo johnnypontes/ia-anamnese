@@ -33,7 +33,51 @@ app.post("/api/analyze-audio", async (req, res) => {
       contents: {
         parts: [
           { inlineData: { mimeType, data: audioData } },
-          { text: prompt + "\n\nRetorne obrigatoriamente um JSON válido com dois blocos:\n1. Todos os campos clínicos estruturados da anamnese.\n2. Um campo 'transcricao' com o texto bruto da conversa organizado por fala, exatamente assim:\n\"Médico: [fala]\\nPaciente: [fala]\\nMédico: [fala]...\"\nNão omita nenhuma informação mencionada no áudio. Se algo não couber nos campos estruturados, coloque na transcrição." }
+          { text: prompt + `\n\nRetorne SOMENTE um JSON válido, sem markdown, sem texto fora do JSON, com exatamente esta estrutura:
+{
+  "paciente": {
+    "nome": "nome extraído do áudio ou 'Não informado'",
+    "identificacao": {
+      "idade": "idade mencionada ou ''",
+      "sexo": "sexo mencionado ou ''",
+      "profissao": "profissão mencionada ou ''"
+    }
+  },
+  "queixaPrincipal": {
+    "relato": "descrição completa da queixa principal",
+    "inicio": "quando começou",
+    "intensidade": "escala de dor EVA se mencionada, senão ''"
+  },
+  "hda": {
+    "inicioMecanismo": "como e quando iniciou",
+    "localizacaoIrradiacao": "localização e irradiação da dor",
+    "fatoresMelhoraPiora": "o que melhora ou piora",
+    "tratamentosPrevios": "tratamentos anteriores mencionados"
+  },
+  "antecedentes": {
+    "pessoais": "doenças anteriores mencionadas",
+    "familiares": "histórico familiar mencionado",
+    "medicamentosEmUso": ["medicamento1", "medicamento2"]
+  },
+  "habitosEstiloVida": "hábitos mencionados",
+  "revisaoSistemas": "outros sistemas mencionados",
+  "exameFisico": {
+    "sinaisVitais": { "pa": "", "fc": "", "satO2": "" },
+    "avaliacaoSegmentar": "achados físicos mencionados"
+  },
+  "impressaoDiagnostica": {
+    "principal": "hipótese diagnóstica principal",
+    "diferenciais": "diagnósticos diferenciais"
+  },
+  "condutaMedica": {
+    "examesSolicitados": "exames pedidos",
+    "prescricao": "medicamentos prescritos",
+    "orientacoes": "orientações ao paciente"
+  },
+  "evolucaoClinica": "evolução mencionada",
+  "transcricao": "Médico: [fala]\\nPaciente: [fala]\\nMédico: [fala]... (transcrição completa organizada por fala)"
+}
+Preencha todos os campos com base no áudio. Se uma informação não foi mencionada, deixe o campo como string vazia. Não invente informações.` }
         ]
       },
       config: { responseMimeType: "application/json" }

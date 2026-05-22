@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "tsx": "^4.15.0",

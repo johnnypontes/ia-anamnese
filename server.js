@@ -123,7 +123,12 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-  console.log(`GEMINI_API_KEY: ${process.env.GEMINI_API_KEY ? "✅ configurada" : "❌ ausente"}`);
-});
+// Na Vercel o app é exportado como função serverless (api/index.js); localmente/Render sobe o servidor.
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`GEMINI_API_KEY: ${process.env.GEMINI_API_KEY ? "✅ configurada" : "❌ ausente"}`);
+  });
+}
+
+export default app;

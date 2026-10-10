@@ -132,7 +132,7 @@ export default function App() {
         ? 'audio/webm;codecs=opus'
         : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg';
 
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType, audioBitsPerSecond: 24000 });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
